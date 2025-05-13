@@ -1,8 +1,55 @@
 .visual-container {
-    padding: 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+  color: #333;
+}
+
+/* Row 1: Chart1 + Chart4 */
+.row-top {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Row 2: Chart3 + Chart2 + Chart5 */
+.row-bottom {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+/* Chart box style */
+.chart-section {
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Chart title */
+.chart-section h2 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #222;
+}
+
+/* Mobile responsive */
+@media (max-width: 900px) {
+  .row-top, .row-bottom {
+    grid-template-columns: 1fr;
   }
-  
-  .chart-section {
-    margin-bottom: 3rem;
-    max-width: 700px;
-  }
+}
