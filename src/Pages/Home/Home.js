@@ -160,7 +160,7 @@ function Home() {
 
   return (
     <div className="home-container">
-      <h1>Qimatx News Dashboard</h1>
+      <h1>News Dashboard</h1>
 
       <div>
         <label>
@@ -283,7 +283,6 @@ function Home() {
           )}
           {compareData && (
             <div className="chart-wrapper">
-              <h3>{compareData.label}</h3>
               <Pie
                 data={{
                   labels: ["NewsAPI", "The Guardian","Other"],
