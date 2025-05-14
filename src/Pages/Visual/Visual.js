@@ -37,23 +37,33 @@ function Visual() {
 
   useEffect(() => {
     const fetchAll = async () => {
-      const c1 = await fetch("http://localhost:5000/chart1").then(res => res.json());
-      const c2 = await fetch("http://localhost:5000/chart2").then(res => res.json());
-      const c3 = await fetch("http://localhost:5000/chart3").then(res => res.json());
-      const c4 = await fetch("http://localhost:5000/chart4").then(res => res.json());
-      const c5 = await fetch("http://localhost:5000/chart5").then(res => res.json());
-      setChart1(c1); setChart2(c2); setChart3(c3); setChart4(c4); setChart5(c5);
+      try {
+        const [c1, c2, c3, c4, c5] = await Promise.all([
+          fetch("http://localhost:5000/chart1").then(res => res.json()),
+          fetch("http://localhost:5000/chart2").then(res => res.json()),
+          fetch("http://localhost:5000/chart3").then(res => res.json()),
+          fetch("http://localhost:5000/chart4").then(res => res.json()),
+          fetch("http://localhost:5000/chart5").then(res => res.json()),
+        ]);
+        setChart1(c1);
+        setChart2(c2);
+        setChart3(c3);
+        setChart4(c4);
+        setChart5(c5);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      }
     };
     fetchAll();
   }, []);
 
-  if (!chart1 || !chart2 || !chart3 || !chart4 || !chart5) return <p>Loading charts...</p>;
+  if (!chart1 || !chart2 || !chart3 || !chart4 || !chart5) {
+    return <p>Loading charts...</p>;
+  }
 
   return (
     <div className="visual-container">
-      {/* <h1>News Visualizations</h1> */}
 
-      {/* Row 1: Chart1 + Chart4 */}
       <div className="row-top">
         <div className="chart-section">
           <h2>Articles by Category</h2>
@@ -69,49 +79,29 @@ function Visual() {
 
         <div className="chart-section">
           <h2>Article Trends by Source</h2>
-          {!chart4.news_article_trends ? (
-            <p>No data for chart 4</p>
-          ) : (
-            (() => {
-              const trends = chart4.news_article_trends;
-              const allDates = Array.from(new Set(
-                Object.values(trends).flatMap(sourceData => Object.keys(sourceData))
-              )).sort();
+          {chart4.news_article_trends ? (() => {
+            const trends = chart4.news_article_trends;
+            const allDates = Array.from(new Set(
+              [].concat(...Object.values(trends).map(sourceData => Object.keys(sourceData)))
+            )).sort();
 
-              const datasets = Object.entries(trends).map(([source, data], index) => ({
-                label: source,
-                data: allDates.map(date => data[date] || 0),
-                fill: false,
-                borderColor: ['#FF6384', '#36A2EB', '#4BC0C0', '#9966FF', '#FF9F40'][index % 5],
-                tension: 0.1
-              }));
+            const datasets = Object.entries(trends).map(([source, data], index) => ({
+              label: source,
+              data: allDates.map(date => data[date] || 0),
+              fill: false,
+              borderColor: ['#FF6384', '#36A2EB', '#4BC0C0', '#9966FF', '#FF9F40'][index % 5],
+              tension: 0.1
+            }));
 
-              return (
-                <Line
-                  data={{
-                    labels: allDates,
-                    datasets: datasets
-                  }}
-                  options={{
-                    responsive: true,
-                    plugins: {
-                      title: {
-                        display: true,
-                        text: "Article Trends Over Time by Source"
-                      }
-                    },
-                    scales: {
-                      y: { beginAtZero: true }
-                    }
-                  }}
-                />
-              );
-            })()
-          )}
+            return <Line data={{ labels: allDates, datasets }} options={{
+              responsive: true,
+              plugins: { title: { display: true, text: "Article Trends Over Time by Source" } },
+              scales: { y: { beginAtZero: true } }
+            }} />
+          })() : <p>No data for chart 4</p>}
         </div>
       </div>
 
-      {/* Row 2: Chart3 + Chart2 + Chart5 */}
       <div className="row-bottom">
         <div className="chart-section">
           <h2>Author Availability</h2>
@@ -141,39 +131,39 @@ function Visual() {
 
         <div className="chart-section">
           <h2>Articles by Category and Source</h2>
-          {chart5.fo && (
-            <Bar
+          {chart5.category_by_source && (
+          <Bar
               data={{
-                labels: Object.keys(chart5.category_by_source),
-                datasets: Array.from(
-                  new Set(
-                    Object.values(chart5.category_by_source)
-                      .flatMap(obj => Object.keys(obj))
-                  )
-                ).map((source, index) => ({
-                  label: source,
-                  data: Object.keys(chart5.category_by_source).map(
-                    category => chart5.category_by_source[category][source] || 0
-                  ),
-                  backgroundColor: ['#FF6384', '#36A2EB', '#4BC0C0', '#9966FF', '#FF9F40'][index % 5]
-                }))
+                  labels: Object.keys(chart5.category_by_source),
+                  datasets: Array.from(
+                      new Set(
+                          [].concat(...Object.values(chart5.category_by_source || {}).map(obj => Object.keys(obj)))
+                      )
+                  ).map((source, index) => ({
+                      label: source,
+                      data: Object.keys(chart5.category_by_source).map(
+                          category => chart5.category_by_source[category][source] || 0
+                      ),
+                      backgroundColor: ['#FF6384', '#36A2EB', '#4BC0C0', '#9966FF', '#FF9F40'][index % 5]
+                  }))
               }}
               options={{
-                responsive: true,
-                plugins: {
-                  title: {
-                    display: true,
-                    text: "Articles per Category by Source"
+                  responsive: true,
+                  plugins: {
+                      title: {
+                          display: true,
+                          text: "Articles per Category by Source"
+                      }
+                  },
+                  scales: {
+                      y: { beginAtZero: true }
                   }
-                },
-                scales: {
-                  y: { beginAtZero: true }
-                }
               }}
-            />
-          )}
+          />
+      )}
         </div>
       </div>
+
     </div>
   );
 }
